@@ -143,7 +143,7 @@ def main():
     win = visual.Window(screen_res, fullscr=False, monitor='testMonitor', units='pix', color=conf['BACKGROUND_COLOR'])
     event.Mouse(visible=False, newPos=None, win=win)  # Make mouse invisible
 
-    PART_ID: int = info['ID'] + info['Sex'] + info['Age']
+    PART_ID = info['ID'] + info['Sex'] + info['Age']
     logging.LogFile(join('results', f'{PART_ID}.log'), level=logging.INFO)  # errors logging
     logging.info('FRAME RATE: {}'.format(frame_rate))
     logging.info('SCREEN RES: {}'.format(screen_res))
@@ -178,7 +178,7 @@ def main():
     show_info(win, join('.', 'messages', 'before_experiment.txt'))
 
     for block_no in range(conf['NO_BLOCKS']):
-        for _ in range(conf['Trials in block'])
+        for _ in range(conf['Trials in block']):
             key_pressed, rt, ... = run_trial(win, conf, clock, ...)
             RESULTS.append([PART_ID, block_no, trial_no, 'experiment', ...])
             trial_no += 1
