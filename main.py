@@ -6,7 +6,7 @@ import random
 import atexit
 import codecs
 
-from typing import List, Dict, Tuple
+from typing import *
 from os.path import join
 from psychopy import visual, event, logging, gui, core
 
@@ -99,7 +99,7 @@ def show_info(win: visual.Window, file_name: str, insert: str = '') -> None:
         Nothing.
     """
     msg = read_text_from_file(file_name, insert=insert)
-    msg = visual.TextStim(win, color='black', text=msg, height=20, wrapWidth=SCREEN_RES['width'])
+    msg = visual.TextStim(win, color='black', text=msg, height=20, wrapWidth=SCREEN_RES[0])
     msg.draw()
     win.flip()
     key = event.waitKeys(keyList=['f7', 'return', 'space', 'left', 'right'])
@@ -122,8 +122,9 @@ def abort_with_error(err: str) -> None:
 # GLOBALS
 
 RESULTS = list()  # list in which data will be colected
-RESULTS.append(['PART_ID', 'Trial_no', 'Reaction time', 'Correctness', '...'])  # ... Results header
-
+# ... Results header
+RESULTS.append(['id', 'type', 'central_char', 'surrounding_char', 'trial_number', 'trial_type', 'key_pressed', 'correct', 'reaction_time'])
+SCREEN_RES = []
 
 def main():
     global PART_ID  # PART_ID is used in case of error on @atexit, that's why it must be global
@@ -134,55 +135,29 @@ def main():
     if not dict_dlg.OK:
         abort_with_error('Info dialog terminated.')
 
-    clock = core.Clock()
     # load config, all params should be there
     conf: Dict = yaml.load(open('config.yaml', encoding='utf-8'), Loader=yaml.SafeLoader)
-    frame_rate: int = conf['FRAME_RATE']
-    screen_res: List[int] = conf['SCREEN_RES']
+    global SCREEN_RES
+    SCREEN_RES = conf['SCREEN_RES']
     # === Scene init ===
-    win = visual.Window(screen_res, fullscr=False, monitor='testMonitor', units='pix', color=conf['BACKGROUND_COLOR'])
+    win = visual.Window(SCREEN_RES, fullscr=False, monitor='testMonitor', units='pix', color=conf['BACKGROUND_COLOR'])
     event.Mouse(visible=False, newPos=None, win=win)  # Make mouse invisible
 
     PART_ID = info['ID'] + info['Sex'] + info['Age']
     logging.LogFile(join('results', f'{PART_ID}.log'), level=logging.INFO)  # errors logging
-    logging.info('FRAME RATE: {}'.format(frame_rate))
-    logging.info('SCREEN RES: {}'.format(screen_res))
-
-    # === Prepare stimulus here ===
-    #
-    # Examples:
-    # fix_cross = visual.TextStim(win, text='+', height=100, color=conf['FIX_CROSS_COLOR'])
-    # que = visual.Circle(win, radius=conf['QUE_RADIUS'], fillColor=conf['QUE_COLOR'], lineColor=conf['QUE_COLOR'])
-    # stim = visual.TextStim(win, text='', height=conf['STIM_SIZE'], color=conf['STIM_COLOR'])
-    # mask = visual.ImageStim(win, image='mask4.png', size=(conf['STIM_SIZE'], conf['STIM_SIZE']))
+    logging.info('SCREEN RES: {}'.format(SCREEN_RES))
 
     # === Training ===
     show_info(win, join('.', 'messages', 'hello.txt'))
     show_info(win, join('.', 'messages', 'before_training.txt'))
-    csi_list = [conf['TRAINING_CSI']] * conf['NO_TRAINING_TRIALS'][1]
-
-    for trial_no, csi in enumerate(csi_list, 1):
-        key_pressed, rt, ... = run_trial(win, conf, clock, ...)
-        corr = ...
-        RESULTS.append([PART_ID, trial_no, 'training', ...])
-
-        # it's a good idea to show feedback during training trials
-        feedb = "Poprawnie" if corr else "Niepoprawnie"
-        feedb = visual.TextStim(win, text=feedb, height=50, color=conf['FIX_CROSS_COLOR'])
-        feedb.draw()
-        win.flip()
-        core.wait(1)
-        win.flip()
+    run_session(win, conf, conf['NO_TRAINING_TRIALS'], True)
 
     # === Experiment ===
     show_info(win, join('.', 'messages', 'before_experiment.txt'))
 
     for block_no in range(conf['NO_BLOCKS']):
-        for _ in range(conf['Trials in block']):
-            key_pressed, rt, ... = run_trial(win, conf, clock, ...)
-            RESULTS.append([PART_ID, block_no, trial_no, 'experiment', ...])
-            trial_no += 1
-        show_image(win, join('.', 'images', 'break.jpg'), size=screen_res)
+        run_session(win, conf, conf['TRIALS_IN_BLOCK'], False)
+        #break
 
     # === Cleaning time ===
     save_beh_results()
@@ -191,7 +166,22 @@ def main():
     win.close()
 
 
-def run_trial(win, conf, clock, ...):
+def run_session(win, conf, no_trials, is_training):
+    for trial_no in range(no_trials):
+        key_pressed, rt, central, surrounding = run_trial(win, conf)
+        corr = central == key_pressed
+        typ = "Zgodny" if central == surrounding else "Neutralny" if surrounding == 'o' else "Niezgodny"
+        RESULTS.append([PART_ID, typ, central, surrounding, trial_no, 'training' if is_training else "experimental", key_pressed, str(corr), rt])
+        # it's a good idea to show feedback during training trials
+        if is_training:
+            feedb = "Poprawnie" if corr else "Niepoprawnie"
+            feedb = visual.TextStim(win, text=feedb, height=50, color=conf['FIX_CROSS_COLOR'])
+            feedb.draw()
+            win.flip()
+            core.wait(1)
+
+
+def run_trial(win, conf):
     """
     Prepare and present single trial of procedure.
     Input (params) should consist all data need for presenting stimuli.
@@ -202,39 +192,32 @@ def run_trial(win, conf, clock, ...):
     """
 
     # === Prepare trial-related stimulus ===
-    # Randomise if needed
-    #
-    # Examples:
-    #
-    # que_pos = random.choice([-conf['STIM_SHIFT'], conf['STIM_SHIFT']])
-    # stim.text = random.choice(conf['STIM_LETTERS'])
-    #
-
+    central = random.choice(['left', 'right'])
+    surrounding = random.choice(['left', 'right', 'neutral'])
+    central_char = '<' if central == 'left' else '>'
+    surrounding_char = '<' if surrounding == 'left' else '>' if surrounding == 'right' else 'o'
+    text = 2 * surrounding_char + central_char + 2 * surrounding_char
+    stim = visual.TextStim(win, text=text, color='black')
     # === Start pre-trial  stuff (Fixation cross etc.)===
-
-    # for _ in range(conf['FIX_CROSS_TIME']):
-    #    fix_cross.draw()
-    #    win.flip()
+    fix_cross = visual.TextStim(win, text='x', color='black')
+    fix_cross.draw()
+    win.flip()
+    core.wait(conf['FIX_CROSS_TIME_S'])
 
     # === Start trial ===
     # This part is time-crucial. All stims must be already prepared.
+
     # Only .draw() .flip() and reaction related stuff goes there.
     event.clearEvents()
-    # make sure, that clock will be reset exactly when stimuli will be drawn
-    win.callOnFlip(clock.reset)
-
-    for _ in range(conf['STIM_TIME']):  # present stimuli
+    clock = core.Clock()
+    reaction = None
+    stim.draw()
+    win.flip()
+    while clock.getTime() < conf['STIM_TIME_S']:
         reaction = event.getKeys(keyList=list(conf['REACTION_KEYS']), timeStamped=clock)
         if reaction:  # break if any button was pressed
             break
-        stim.draw()
-        win.flip()
 
-    if not reaction:  # no reaction during stim time, allow to answer after that
-        question_frame.draw()
-        question_label.draw()
-        win.flip()
-        reaction = event.waitKeys(keyList=list(conf['REACTION_KEYS']), maxWait=conf['REACTION_TIME'], timeStamped=clock)
     # === Trial ended, prepare data for send  ===
     if reaction:
         key_pressed, rt = reaction[0]
@@ -242,7 +225,8 @@ def run_trial(win, conf, clock, ...):
         key_pressed = 'no_key'
         rt = -1.0
 
-    return key_pressed, rt  # return all data collected during trial
+    # id, type, central, surrounding, trial_number, key_pressed, corr, rt
+    return key_pressed, rt, central, surrounding  # return all data collected during trial
 
 
 if __name__ == '__main__':
