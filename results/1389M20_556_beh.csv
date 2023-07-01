@@ -1,0 +1,6 @@
+id,type,central_char,surrounding_char,trial_number,trial_type,key_pressed,correct,reaction_time
+1389M20,Niezgodny,prawo,lewo,0,training,False,0.6996083999983966
+1389M20,Zgodny,prawo,prawo,1,training,False,0.470507699996233
+1389M20,Zgodny,prawo,prawo,2,training,False,0.5331903998740017
+1389M20,Niezgodny,lewo,neutralny,3,training,False,0.6499640000984073
+1389M20,Niezgodny,prawo,neutralny,4,training,False,0.5325430000666529

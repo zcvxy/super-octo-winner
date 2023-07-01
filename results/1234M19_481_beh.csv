@@ -1,0 +1,16 @@
+id,type,central_char,surrounding_char,trial_number,trial_type,key_pressed,correct,reaction_time
+1234M19,Zgodny,left,left,0,training,left,True,0.4320621998049319
+1234M19,Niezgodny,left,neutral,1,training,right,False,0.7863454001490027
+1234M19,Niezgodny,right,left,2,training,no_key,False,-1.0
+1234M19,Zgodny,left,left,3,training,no_key,False,-1.0
+1234M19,Niezgodny,right,neutral,4,training,no_key,False,-1.0
+1234M19,Niezgodny,right,left,0,experimental,left,False,0.39270399999804795
+1234M19,Niezgodny,left,neutral,1,experimental,left,True,0.368714899988845
+1234M19,Niezgodny,left,neutral,2,experimental,left,True,0.3287043001037091
+1234M19,Niezgodny,left,neutral,3,experimental,left,True,0.2829811000265181
+1234M19,Zgodny,right,right,4,experimental,left,False,0.3041109999176115
+1234M19,Zgodny,right,right,0,experimental,left,False,0.18244810006581247
+1234M19,Niezgodny,right,neutral,1,experimental,left,False,0.28589969989843667
+1234M19,Niezgodny,right,left,2,experimental,left,False,0.29206319991499186
+1234M19,Zgodny,left,left,3,experimental,left,True,0.2821283000521362
+1234M19,Zgodny,left,left,4,experimental,left,True,0.26708379993215203
