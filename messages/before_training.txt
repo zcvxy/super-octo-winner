@@ -1,4 +1,11 @@
-Przypominamy krótko polecenie do zadania. 
+SESJA TRENINGOWA: 
 
-Przyciśnij SPACJĘ by rozpocząć.
+Twoim zadaniem będzie reagowanie na określone bodźce w zestawach flankerów. 
+ 
+Do udzielenia odpowiedzi, używaj przycisków strzałek na klawiaturze. 
 
+Po udzieleniu odpowiedzi na ekranie pojawi się informacja o poprawności wciśniętego klawisza.
+
+Skup wzrok na punkcie "x" na środku ekranu.
+
+By przejść do sesji wciśnij spację.

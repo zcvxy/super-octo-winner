@@ -1,2 +1,3 @@
-Przerwa, zachęta od krótkiego rozluźnienia, informacja, że w dowolnym
-momencie można kontynuować wciskając spacje. 
+Teraz trwa przerwa.
+
+W dowolnym momencie możesz kontynuować badanie wciskając spację.

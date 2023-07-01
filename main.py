@@ -99,10 +99,10 @@ def show_info(win: visual.Window, file_name: str, insert: str = '') -> None:
         Nothing.
     """
     msg = read_text_from_file(file_name, insert=insert)
-    msg = visual.TextStim(win, color='black', text=msg, height=20, wrapWidth=SCREEN_RES[0])
+    msg = visual.TextStim(win, color='black', text=msg, height=30, wrapWidth=SCREEN_RES[0])
     msg.draw()
     win.flip()
-    key = event.waitKeys(keyList=['f7', 'return', 'space', 'left', 'right'])
+    key = event.waitKeys(keyList=['esc', 'return', 'space', 'left', 'right'])
     if key == ['f7']:
         abort_with_error('Experiment finished by user on info screen! F7 pressed.')
     win.flip()
@@ -126,11 +126,12 @@ RESULTS = list()  # list in which data will be colected
 RESULTS.append(['id', 'type', 'central_char', 'surrounding_char', 'trial_number', 'trial_type', 'key_pressed', 'correct', 'reaction_time'])
 SCREEN_RES = []
 
+
 def main():
     global PART_ID  # PART_ID is used in case of error on @atexit, that's why it must be global
 
     # === Dialog popup ===
-    info: Dict = {'ID': '', 'Sex': ['M', "F"], 'Age': '20'}
+    info: Dict = {'ID': '', 'Sex': ['M', "F"], 'Age': ''}
     dict_dlg = gui.DlgFromDict(dictionary=info, title='Experiment title, fill by your name!')
     if not dict_dlg.OK:
         abort_with_error('Info dialog terminated.')
@@ -158,7 +159,8 @@ def main():
     for block_no in range(conf['NO_BLOCKS']):
         run_session(win, conf, conf['TRIALS_IN_BLOCK'], False)
         #break
-
+        if block_no == 0:
+            show_info(win, join('.', 'messages', 'break.txt'))
     # === Cleaning time ===
     save_beh_results()
     logging.flush()
@@ -175,7 +177,7 @@ def run_session(win, conf, no_trials, is_training):
         # it's a good idea to show feedback during training trials
         if is_training:
             feedb = "Poprawnie" if corr else "Niepoprawnie"
-            feedb = visual.TextStim(win, text=feedb, height=50, color=conf['FIX_CROSS_COLOR'])
+            feedb = visual.TextStim(win, text=feedb, height=conf['TEXT_HEIGHT'], color=conf['FIX_CROSS_COLOR'])
             feedb.draw()
             win.flip()
             core.wait(1)
@@ -197,9 +199,9 @@ def run_trial(win, conf):
     central_char = '<' if central == 'left' else '>'
     surrounding_char = '<' if surrounding == 'left' else '>' if surrounding == 'right' else 'o'
     text = 2 * surrounding_char + central_char + 2 * surrounding_char
-    stim = visual.TextStim(win, text=text, color='black')
+    stim = visual.TextStim(win, text=text, color='black', height=conf['TEXT_HEIGHT'])
     # === Start pre-trial  stuff (Fixation cross etc.)===
-    fix_cross = visual.TextStim(win, text='x', color='black')
+    fix_cross = visual.TextStim(win, text='x', color='black', height=conf['TEXT_HEIGHT']-15)
     fix_cross.draw()
     win.flip()
     core.wait(conf['FIX_CROSS_TIME_S'])
